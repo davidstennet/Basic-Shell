@@ -62,12 +62,19 @@ int builtin_ls(char** argv) {
 
         // If statements for all the possible options
         if (option == NULL) {
-            if (strcmp(dir->d_name[0], ".") == 0)
-            continue;
-            printf("%s\n", dir->d_name);
+            if (dir->d_name[0] == '.')
+                continue;
+            
+            // Prints out specific colors depening on their types
+            if (dir->d_type == DT_DIR) {
+                printf("\033[1;34m%s/\033[0m\n", dir->d_name);
+            }
+            else {
+                printf("%s\n", dir->d_name);
+            }
         }
-        else if (strcmp(*option, "-a") == 0) {
-
+        else if (strcmp(option, "-a") == 0) {
+            printf("%s\n", dir->d_name);
         }
         
     }
