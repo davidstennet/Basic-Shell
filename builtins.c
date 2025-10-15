@@ -5,11 +5,24 @@
 #include <unistd.h>
 #include <string.h>
 #include <dirent.h>
+#include <limits.h>
 #include <sys/types.h>
+#include <sys/stat.h> // Use for struct stat and prining ls -l
 #include "builtins.h"
 
 int builtin_exit() {
     return 1; // 1 means that you must exit the function
+}
+
+int builtin_pwd() {
+    char cwd[PATH_MAX];
+    if (getcwd(cwd, sizeof(cwd)) == NULL) {
+        perror("pwd");
+        return -1;
+    }
+
+    printf("%s\n", cwd);
+    return 0;
 }
 
 int builtin_cd(char** argv) {
@@ -27,6 +40,21 @@ int builtin_cd(char** argv) {
     }     
 
     return 0;
+}
+
+// TODO
+// prints permissinos for a file/ directory
+void print_permissions() {
+
+}
+
+void print_filename(struct dirent* dir) {
+    if (dir->d_type == DT_DIR) {
+        printf("\033[1;34m%s\033[0m\n", dir->d_name);
+    }
+    else {
+        printf("%s\n", dir->d_name);
+    }
 }
 
 int builtin_ls(char** argv) {
@@ -59,27 +87,33 @@ int builtin_ls(char** argv) {
         return -1;
     }
 
-    // Iterates through the stream printing out the directories
-    while ((dir = readdir(dir_stream)) != NULL) {
-
-        // If statements for all the possible options
-        if (option == NULL) {
+    // Different printing options depedning on the option
+    if (option == NULL) {
+        while ((dir = readdir(dir_stream)) != NULL) {
             if (dir->d_name[0] == '.')
                 continue;
-            
-            // Prints out specific colors depening on their types
-            if (dir->d_type == DT_DIR) {
-                printf("\033[1;34m%s/\033[0m\n", dir->d_name);
-            }
-            else {
-                printf("%s\n", dir->d_name);
-            }
+
+            print_filename(dir);
         }
-        else if (strcmp(option, "-a") == 0) {
-            printf("%s\n", dir->d_name);
-        }
-        
     }
+    else if (strcmp(option, "-a") == 0) { // Displays all the files
+        while ((dir = readdir(dir_stream)) != NULL) {
+            print_filename(dir);
+        }
+    }
+    else if (strcmp(option, "-l") == 0) { // Displays long version of the file
+        while ((dir = readdir(dir_stream)) != NULL) {
+            // 1. print_permissions();
+            // 2. print hard links
+            // 3. print owner of the file
+            // 4. print group that owns the file
+            // 5. print file size in bytes
+            // 6. print when file was lost modified (Jan 1 06:00)
+            // 7. print name of the file
+            print_filename(dir);
+        }
+    }
+
 
     closedir(dir_stream);
 

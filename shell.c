@@ -120,6 +120,11 @@ int handle_builtin(char** argv) {
         return builtin_exit();
     }
 
+    // pwd command
+    if (strcmp(argv[0], "pwd") == 0) {
+        return builtin_pwd();
+    }
+
     // cd command
     if (strcmp(argv[0], "cd") == 0) {
         return builtin_cd(argv);
